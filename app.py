@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from tensorflow.keras.losses import MeanSquaredError
 import os
 import socket
 import traceback
@@ -9,6 +8,7 @@ import numpy as np
 # Optional ML import
 try:
     from tensorflow.keras.models import load_model
+    from tensorflow.keras.losses import MeanSquaredError
 except ImportError:
     print("TensorFlow not installed. Please run: pip install tensorflow")
 
@@ -16,9 +16,10 @@ except ImportError:
 app = Flask(__name__)
 CORS(app)
 
-# Load ML model if available
-MODEL_PATH = r"C:\\Users\\white\\OneDrive\\Desktop\\AI cybergaurd\\AI cybergaurd\\models\\autoencoder.h5"
+# Use relative path for model (works on Render)
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "models", "autoencoder.h5")
 model = None
+
 if os.path.exists(MODEL_PATH):
     try:
         model = load_model(MODEL_PATH, custom_objects={"mse": MeanSquaredError()})
@@ -78,7 +79,7 @@ def find_free_port(start_port=5000):
     port = start_port
     while True:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            if s.connect_ex(('127.0.0.1', port)) != 0:
+            if s.connect_ex(('0.0.0.0', port)) != 0:
                 return port
             port += 1
 
